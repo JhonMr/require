@@ -4,12 +4,8 @@
 * Description:
 */
 
-// 全局模块缓存
-const moduleCache = {}
 
-const moduleBeDeps = {}
-
-class Module {
+const Module = class Module {
     /*
     * deps 依赖模块名数组
     * depsUnload 未加载完成的依赖模块
@@ -20,7 +16,8 @@ class Module {
     *   2：执行完成
     *
     * */
-
+    static modules = {}
+    static modulesBeDeps = {}
     constructor(src, deps, cb) {
         this.name = src
         this.deps = deps
@@ -31,14 +28,14 @@ class Module {
         this.result = null
 
         // 缓存自己到全局模块缓存中
-        moduleCache[this.name] = this
+        Module.modules[this.name] = this
 
         // 记录自身被引用
-        if(!moduleBeDeps[this.name]) {
-            moduleBeDeps[this.name] = this.beDeps
+        if(!Module.modulesBeDeps[this.name]) {
+            Module.modulesBeDeps[this.name] = this.beDeps
         }
         else {
-            this.beDeps = moduleBeDeps[this.name]
+            this.beDeps = Module.modulesBeDeps[this.name]
         }
 
         Object.defineProperty(this, 'depsUnload', {
@@ -67,17 +64,17 @@ class Module {
                 // 自己执行完后就要告诉依赖你的其他人
                 if(num == 2) {
                     this.beDeps.map(beDep => {
-                        moduleCache[beDep].depsUnload -= 1
+                        Module.modules[beDep].depsUnload -= 1
                     })
                 }
             }
         })
         if(this.deps.length){
             this.deps.map(dep=>{
-                const module = moduleCache[dep]
+                const module = Module.modules[dep]
                 // 已缓存的模块
                 if(module) {
-                    moduleCache[dep].beDeps.push(this.name)
+                    Module.modules[dep].beDeps.push(this.name)
                     if(module.status==2) {
                         this.depsUnload -= 1
                     }
@@ -91,11 +88,11 @@ class Module {
         // 加载未加载的依赖模块
         this.deps.map(dep=>{
             // 记录依赖模块的被依赖+1
-            if(!moduleBeDeps[dep])
-                moduleBeDeps[dep] = [this.name]
+            if(!Module.modulesBeDeps[dep])
+                Module.modulesBeDeps[dep] = [this.name]
             else
-                moduleBeDeps[dep].push(this.name)
-            if(!moduleCache[dep]) {
+                Module.modulesBeDeps[dep].push(this.name)
+            if(!Module.modules[dep]) {
                 Module.loadModule(dep, ()=>true)
             }
         })
@@ -105,7 +102,7 @@ class Module {
         // 拿参数
         const params = []
         this.deps.map(dep=>{
-            const module = moduleCache[dep]
+            const module = Module.modules[dep]
             params.push(module.result)
         })
         this.result = this.callback(...params)
