@@ -6,4 +6,5 @@
 
 new Module('main', ['./js/a.js'], function(a) {
     document.getElementById('aData').innerText = a.toString()
+    return false
 })
