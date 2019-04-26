@@ -101,16 +101,6 @@ class Module {
         })
     }
 
-    /*
-    * deps 依赖模块名数组
-    * depsUnload 未加载完成的依赖模块
-    * beDeps 依赖本模块的模块列表
-    * status 模块状态
-    *   0：初始化完成
-    *   1：依赖准备完毕
-    *   2：执行完成
-    *
-    * */
     execute() {
         // 拿参数
         const params = []
