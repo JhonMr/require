@@ -4,6 +4,6 @@
 * Description:
 */
 
-new Module('./js/a.js', [], function() {
-    return '我是a模块的数据！！'
+new Module('./js/a.js', ['./js/b.js'], function(b) {
+    return '我是a模块的数据！！' + b
 })
